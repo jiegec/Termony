@@ -1,0 +1,72 @@
+name: hnp-build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * *"
+
+env:
+  OHOS_SDK_RELEASE_VERSION: "5.1.0"
+  OHOS_SDK_VERSION: "5.1.0.107"
+  OHOS_SDK_HOME: ${{ github.workspace }}/ohos-sdk/linux
+
+jobs:
+  build-hnp:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Update Apt Cache
+        run: sudo apt update
+
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          # this might remove tools that are actually needed,
+          # if set to "true" but frees about 6 GB
+          tool-cache: true
+          # all of these default to true, but feel free to set to
+          # "false" if necessary for your workflow
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Dependencies
+        run: |
+          sudo apt install -y build-essential cmake curl wget unzip python3 libncurses-dev \
+                              git flex bison bash make autoconf libcurl4-openssl-dev tcl \
+                              gettext zip pigz
+                              
+      - name: Download OHOS SDK
+        shell: bash
+        run: |
+          curl -OL https://repo.huaweicloud.com/openharmony/os/${OHOS_SDK_RELEASE_VERSION}-Release/ohos-sdk-windows_linux-public.tar.gz
+          tar -xzf ohos-sdk-windows_linux-public.tar.gz
+          rm ohos-sdk-windows_linux-public.tar.gz
+          rm -rf ohos-sdk/{ohos,windows}
+          pushd ohos-sdk/linux
+            for file in $(find . -type f); do
+              unzip $file && rm $file
+            done
+          popd
+
+      - name: Build hnp
+        shell: bash
+        run: |
+          make -C build-hnp
+
+      - name: Upload hnp
+        uses: actions/upload-artifact@v4
+        with:
+          name: hnp
+          path: |
+            build-hnp/*.hnp
+          retention-days: 7
