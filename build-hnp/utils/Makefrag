@@ -14,3 +14,4 @@ export STRIP := $(OHOS_SDK_HOME)/native/llvm/bin/llvm-strip
 export CFLAGS := -I$(shell pwd)/../sysroot/include -Wno-int-conversion
 export CXXFLAGS := -I$(shell pwd)/../sysroot/include
 export LDFLAGS := -L$(shell pwd)/../sysroot/lib
+export CFLAGS_FOR_BUILD := -std=gnu17
