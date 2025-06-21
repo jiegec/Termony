@@ -1,0 +1,28 @@
+include ../utils/Makefrag
+
+all: download/glib
+	rm -rf temp build
+	mkdir -p temp build
+	cd temp && cp -vr ../download/glib glib	
+	cd temp/glib && git submodule update --init --recursive
+	cd temp/glib && rm cross.txt | true
+	cd temp/glib && echo "[binaries]" >> cross.txt
+	cd temp/glib && echo "c = '${OHOS_SDK_HOME}/native/llvm/bin/aarch64-unknown-linux-ohos-clang'" >> cross.txt
+	cd temp/glib && echo "cpp = '${OHOS_SDK_HOME}/native/llvm/bin/aarch64-unknown-linux-ohos-clang++'" >> cross.txt
+	cd temp/glib && echo "ar = '${OHOS_SDK_HOME}/native/llvm/bin/llvm-ar'" >> cross.txt
+	cd temp/glib && echo "ld = '${OHOS_SDK_HOME}/native/llvm/bin/ld.lld'" >> cross.txt
+	cd temp/glib && echo "strip = '${OHOS_SDK_HOME}/native/llvm/bin/llvm-strip'" >> cross.txt
+	cd temp/glib && echo "[host_machine]" >> cross.txt
+	cd temp/glib && echo "system = 'linux'" >> cross.txt
+	cd temp/glib && echo "cpu_family = 'aarch64'" >> cross.txt
+	cd temp/glib && echo "cpu = 'aarch64'" >> cross.txt
+	cd temp/glib && echo "endian = 'little'" >> cross.txt
+	cd temp/glib && meson --cross-file cross.txt --prefix=/ -Dselinux=false -Dinstalled_tests=false -Ddtrace=disabled -Dsystemtap=disabled -Dselinux=disabled -Dlibelf=disabled -Dlibmount=disabled build
+	cd temp/glib/build && meson compile 
+	mkdir -p ../sysroot
+	cd temp/glib/build && DESTDIR=$(shell pwd)/build meson install
+	cp -rfv ./build/. ../sysroot | tee file.lst
+
+download/glib:
+	mkdir -p download
+	cd download && rm -rf glib && git clone -b 2.82.0 --depth=1 https://gitlab.gnome.org/GNOME/glib.git
