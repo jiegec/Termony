@@ -59,9 +59,9 @@ helpusage() {
 }
 
 hdc_push() {
-	"$TOOL_HOME/sdk/default/openharmony/toolchains/hdc" file send ./entry/build/default/outputs/default/entry-default-signed.hap /data/local/tmp
-	"$TOOL_HOME/sdk/default/openharmony/toolchains/hdc" shell bm install -p /data/local/tmp/entry-default-signed.hap
-	"$TOOL_HOME/sdk/default/openharmony/toolchains/hdc" shell aa start -a EntryAbility -b $(jq ".app.bundleName" AppScope/app.json5)
+	"$OHOS_SDK_HOME/toolchains/hdc" file send ./entry/build/default/outputs/default/entry-default-signed.hap /data/local/tmp
+	"$OHOS_SDK_HOME/toolchains/hdc" shell bm install -p /data/local/tmp/entry-default-signed.hap
+	"$OHOS_SDK_HOME/toolchains/hdc" shell aa start -a EntryAbility -b $(jq ".app.bundleName" AppScope/app.json5)
 }
 
 build_termony() {
