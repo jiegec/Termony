@@ -45,7 +45,9 @@ PKGS=bash \
 	gdb \
 	python \
 	libusb \
-	hdc
+	hdc \
+	libglib \
+	qemu
 STAMP=$(patsubst %,%/.stamp,$(PKGS))
 
 all: copy
